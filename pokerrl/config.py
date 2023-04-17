@@ -4,12 +4,13 @@ from pokerrl.utils import calculate_fixed_limit_mask, calculate_no_limit_betsize
 class Config:
     def __init__(self, game_type=GameTypes.OMAHA_HI, num_players=2, bet_limit=BetLimits.POT_LIMIT,
                  betsizes=(1, 0.9, 0.75, 0.67, 0.5, 0.33, 0.25, 0.1),
-                 blinds=(0.5,1), stack_sizes=100):
+                 blinds=(0.5,1), stack_sizes=100,is_server=False):
         assert num_players >= 2, "Number of players must be at least 2"
         assert bet_limit in [BetLimits.POT_LIMIT, BetLimits.NO_LIMIT, BetLimits.FIXED_LIMIT], "Bet limit must be one of Pot limit, No limit, or Fixed limit"
         assert len(betsizes) > 0, "Betsizes must be a non-empty tuple"
         assert len(blinds) == 2, "Blinds must be a tuple of length 2"
         assert stack_sizes > 0, "Stack sizes must be a positive integer"
+        self.is_server = is_server
         self.game_type = game_type
         self.num_players = num_players
         self.bet_limit = bet_limit

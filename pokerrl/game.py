@@ -1,10 +1,10 @@
 from pokerrl.transition import init_state, step_state
 from pokerrl.config import Config
 from pokerrl.utils import return_current_player
-from pokerrl.view import player_view
+from pokerrl.view import player_view,json_view
 
 class Game:
-    def __init__(self,config):
+    def __init__(self,config:Config):
         self.config = config
         self.global_state = None
         self.done = None
@@ -20,4 +20,7 @@ class Game:
         """ Returns (state, reward, done, info) from the current player's perspective """
         self.global_state, self.done, self.winnings, self.action_mask = step_state(self.global_state, action, self.config)
         current_player = return_current_player(self.global_state)
-        return player_view(self.global_state,current_player,self.config), self.done, self.winnings, self.action_mask
+        if self.config.is_server:
+            return {"state":json_view(self.global_state,current_player,self.config), "done":self.done, "winnings":self.winnings, "action_mask":self.action_mask}
+        else:
+            return player_view(self.global_state,current_player,self.config), self.done, self.winnings, self.action_mask
