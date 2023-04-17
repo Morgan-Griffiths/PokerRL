@@ -24,7 +24,7 @@ def return_current_player(global_state,config):
 
 #### Action Mask Functions ####
 
-def calculate_pot_limit_mask(global_state,config,pot,current_player_investment,current_player_stack,action_mask):
+def calculate_pot_limit_mask(global_state,config,pot,current_player_investment,current_player_stack):
     action_mask = np.zeros(config.num_actions, dtype=int)  # +2 for check and fold
     if global_state[config.global_state_mapping["last_agro_action"]] > ModelActions.CALL:
         max_raise = (pot - current_player_investment) + (2 * global_state[config.global_state_mapping["last_agro_amount"]])
@@ -50,7 +50,7 @@ def calculate_pot_limit_mask(global_state,config,pot,current_player_investment,c
     return action_mask
 
 
-def calculate_no_limit_mask(global_state,config,pot,current_player_investment,current_player_stack,action_mask):
+def calculate_no_limit_mask(global_state,config,pot,current_player_investment,current_player_stack):
     action_mask = np.zeros(config.num_actions, dtype=int)  # +2 for check and fold
     max_bet = current_player_stack
     if global_state[config.global_state_mapping["last_agro_action"]] > ModelActions.CALL:
@@ -74,7 +74,7 @@ def calculate_no_limit_mask(global_state,config,pot,current_player_investment,cu
     return action_mask
 
 
-def calculate_fixed_limit_mask(global_state,config,action,pot,current_player_investment,current_player_stack,action_mask):
+def calculate_fixed_limit_mask(global_state,config,action,pot,current_player_investment,current_player_stack):
     """ TODO """
     action_mask = np.zeros(config.num_actions, dtype=int)  # +2 for check and fold
     if global_state[config.global_state_mapping["last_agro_action"]] > ModelActions.CALL:
