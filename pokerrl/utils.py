@@ -20,7 +20,7 @@ def readable_card_to_int(card):
     return [rank_to_int[card[0]],suit_to_int[card[1]]]
 
 def return_current_player(global_state,config):
-    return global_state[config.global_state_mapping['current_player']]
+    return int(global_state[-1,config.global_state_mapping['current_player']])
 
 #### Action Mask Functions ####
 

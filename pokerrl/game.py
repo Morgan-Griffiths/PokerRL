@@ -14,13 +14,15 @@ class Game:
     def reset(self):
         """ Returns (state, reward, done, info) from the current player's perspective """
         self.global_state, self.done, self.winnings, self.action_mask = init_state(self.config)
-        return self.global_state, self.done, self.winnings, self.action_mask
+        current_player = return_current_player(self.global_state,self.config)
+        if self.config.is_server:
+            return {"game_states":json_view(self.global_state,current_player,self.config), "done":self.done, "winnings":self.winnings, "action_mask":self.action_mask.tolist()}
+        return player_view(self.global_state,current_player,self.config), self.done, self.winnings, self.action_mask
 
     def step(self,action):
         """ Returns (state, reward, done, info) from the current player's perspective """
         self.global_state, self.done, self.winnings, self.action_mask = step_state(self.global_state, action, self.config)
-        current_player = return_current_player(self.global_state)
+        current_player = return_current_player(self.global_state,self.config)
         if self.config.is_server:
             return {"game_states":json_view(self.global_state,current_player,self.config), "done":self.done, "winnings":self.winnings, "action_mask":self.action_mask.tolist()}
-        else:
-            return player_view(self.global_state,current_player,self.config), self.done, self.winnings, self.action_mask
+        return player_view(self.global_state,current_player,self.config), self.done, self.winnings, self.action_mask

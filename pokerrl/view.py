@@ -1,5 +1,6 @@
 import json
 import numpy as np
+from pokerrl.config import Config
 from pokerrl.datatypes import BOARD_CARDS_GIVEN_STREET, SEAT_TO_POSITION, INT_TO_STREET
 from pokerrl.utils import human_readable_cards
 
@@ -127,44 +128,44 @@ def human_readable_view(global_states, player_index, config,display=False):
         display_readable_states(readable_states)
     return readable_states
 
-def json_view(global_states, player_index, config):
+def json_view(global_states, player_index, config:Config):
     player_states = player_view(global_states, player_index, config)
     json_states = []
     for state in player_states:
         state_object = {
-            'hero_cards'                :state[config.global_state_mapping['hand_range'][0]:config.global_state_mapping['hand_range'][1]].tolist(),
-            'board_cards'               :state[config.global_state_mapping['board_range'][0]:config.global_state_mapping['board_range'][1]].tolist(),
-            'street'                    :state[config.global_state_mapping['street']],
-            'num_players'               :state[config.global_state_mapping['num_players']],
-            'hero_position'             :state[config.global_state_mapping['hero_position']],
-            'hero_active'               :state[config.global_state_mapping['hero_active']],
-            'vil1_active'               :state[config.global_state_mapping['vil1_active']],
-            'vil2_active'               :state[config.global_state_mapping['vil2_active']],
-            'vil3_active'               :state[config.global_state_mapping['vil3_active']],
-            'vil4_active'               :state[config.global_state_mapping['vil4_active']],
-            'vil5_active'               :state[config.global_state_mapping['vil5_active']],
-            'vil1_position'             :state[config.global_state_mapping['vil1_position']],
-            'vil2_position'             :state[config.global_state_mapping['vil2_position']],
-            'vil3_position'             :state[config.global_state_mapping['vil3_position']],
-            'vil4_position'             :state[config.global_state_mapping['vil4_position']],
-            'vil5_position'             :state[config.global_state_mapping['vil5_position']],
-            'last_agro_amount'          :state[config.global_state_mapping['last_agro_amount']],
-            'last_agro_action'          :state[config.global_state_mapping['last_agro_action']],
-            'last_agro_position'        :state[config.global_state_mapping['last_agro_position']],
-            'last_agro_is_blind'        :state[config.global_state_mapping['last_agro_is_blind']],
-            'hero_stack'                :state[config.global_state_mapping['hero_stack']],
-            'vil1_stack'                :state[config.global_state_mapping['vil1_stack']],
-            'vil2_stack'                :state[config.global_state_mapping['vil2_stack']],
-            'vil3_stack'                :state[config.global_state_mapping['vil3_stack']],
-            'vil4_stack'                :state[config.global_state_mapping['vil4_stack']],
-            'vil5_stack'                :state[config.global_state_mapping['vil5_stack']],
-            'pot'                       :state[config.global_state_mapping['pot']],
-            'amount_to_call'            :state[config.global_state_mapping['amount_to_call']],
-            'pot_odds'                  :state[config.global_state_mapping['pot_odds']],
-            'previous_amount'           :state[config.global_state_mapping['previous_amount']],
-            'previous_position'         :state[config.global_state_mapping['previous_position']],
-            'previous_action'           :state[config.global_state_mapping['previous_action']],
-            'previous_bet_is_blind'     :state[config.global_state_mapping['previous_bet_is_blind']],
+            'hero_cards'                :state[config.player_state_mapping['hand_range'][0]:config.player_state_mapping['hand_range'][1]].tolist(),
+            'board_cards'               :state[config.player_state_mapping['board_range'][0]:config.player_state_mapping['board_range'][1]].tolist(),
+            'street'                    :state[config.player_state_mapping['street']],
+            'num_players'               :state[config.player_state_mapping['num_players']],
+            'hero_position'             :state[config.player_state_mapping['hero_position']],
+            'hero_active'               :state[config.player_state_mapping['hero_active']],
+            'vil1_active'               :state[config.player_state_mapping['vil_1_active']],
+            'vil2_active'               :state[config.player_state_mapping['vil_2_active']],
+            'vil3_active'               :state[config.player_state_mapping['vil_3_active']],
+            'vil4_active'               :state[config.player_state_mapping['vil_4_active']],
+            'vil5_active'               :state[config.player_state_mapping['vil_5_active']],
+            'vil1_position'             :state[config.player_state_mapping['vil_1_position']],
+            'vil2_position'             :state[config.player_state_mapping['vil_2_position']],
+            'vil3_position'             :state[config.player_state_mapping['vil_3_position']],
+            'vil4_position'             :state[config.player_state_mapping['vil_4_position']],
+            'vil5_position'             :state[config.player_state_mapping['vil_5_position']],
+            'last_agro_amount'          :state[config.player_state_mapping['last_agro_amount']],
+            'last_agro_action'          :state[config.player_state_mapping['last_agro_action']],
+            'last_agro_position'        :state[config.player_state_mapping['last_agro_position']],
+            'last_agro_is_blind'        :state[config.player_state_mapping['last_agro_bet_is_blind']],
+            'hero_stack'                :state[config.player_state_mapping['hero_stack']],
+            'vil1_stack'                :state[config.player_state_mapping['vil_1_stack']],
+            'vil2_stack'                :state[config.player_state_mapping['vil_2_stack']],
+            'vil3_stack'                :state[config.player_state_mapping['vil_3_stack']],
+            'vil4_stack'                :state[config.player_state_mapping['vil_4_stack']],
+            'vil5_stack'                :state[config.player_state_mapping['vil_5_stack']],
+            'pot'                       :state[config.player_state_mapping['pot']],
+            'amount_to_call'            :state[config.player_state_mapping['amount_to_call']],
+            'pot_odds'                  :state[config.player_state_mapping['pot_odds']],
+            'previous_amount'           :state[config.player_state_mapping['previous_amount']],
+            'previous_position'         :state[config.player_state_mapping['previous_position']],
+            'previous_action'           :state[config.player_state_mapping['previous_action']],
+            'previous_bet_is_blind'     :state[config.player_state_mapping['previous_bet_is_blind']],
         }
         json_states.append(state_object)
     return json.dumps(json_states)

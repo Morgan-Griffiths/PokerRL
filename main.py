@@ -2,10 +2,14 @@ from pokerrl.config import Config
 from pokerrl.view import player_view, human_readable_view
 from pokerrl.transition import step_state,init_state
 from pokerrl.play import play_game
+from pokerrl.game import Game
+import json
 
 def main():
-    while True:
-        play_game()
+    game = Game(Config(num_players=2,is_server=True))
+    json.dumps(game.reset())
+    # while True:
+    #     play_game()
     # CALL = 2
     # CHECK = 1
     # config = Config(num_players=2)
