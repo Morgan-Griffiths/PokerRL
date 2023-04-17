@@ -106,7 +106,7 @@ def classify_action(action,player_street_total,player_stack,last_agro_amount,las
     else:
         raise ValueError(f"Invalid action: {action}")
 
-def order_players_by_street(global_state,config:Config):
+def order_players_by_street(global_state:np.ndarray,config:Config):
     active_players = []
     for i in range(1,7):
         if global_state[config.global_state_mapping[f'player_{i}_stack']] > 0 and global_state[config.global_state_mapping[f'player_{i}_active']] == 1:
@@ -115,7 +115,7 @@ def order_players_by_street(global_state,config:Config):
     active_players.sort(key=lambda x: player_ordering[x.position])
     return active_players
 
-def game_over(global_state,config,total_amount_invested):
+def game_over(global_state:np.ndarray,config:Config,total_amount_invested:float):
     # get all hand values
     board = global_state[config.global_state_mapping[f'board_range'][0]:config.global_state_mapping[f'board_range'][1]]
     board = [int(h) for h in board]
@@ -167,7 +167,7 @@ def game_over(global_state,config,total_amount_invested):
     # Reset game state here
     return winnings
 
-def increment_players(global_state,active_players,current_player,config:Config):
+def increment_players(global_state:np.ndarray,active_players:list,current_player:int,config:Config):
     """ Skip players with stack 0. Which can happen if a player when allin but there are 2+ active players remaining """
     global_state[config.global_state_mapping['current_player']] = global_state[config.global_state_mapping['next_player']]
     non_zero_players = [p for p in active_players if p.stack > 0]
@@ -178,14 +178,14 @@ def increment_players(global_state,active_players,current_player,config:Config):
             next_player = non_zero_players[(player_idx + 2) % len(non_zero_players)]
     global_state[config.global_state_mapping[f'next_player']] = next_player.position
 
-def new_street_player_order(global_state,config:Config):
+def new_street_player_order(global_state:np.ndarray,config:Config):
     """ Skip players with stack 0. Which can happen if a player when allin but there are 2+ active players remaining """
     active_players = order_players_by_street(global_state,config)
     non_zero_players = [p for p in active_players if p.stack > 0]
     global_state[config.global_state_mapping[f'current_player']] = non_zero_players[0].position
     global_state[config.global_state_mapping[f'next_player']] = non_zero_players[1].position
 
-def get_action_mask(global_state, player_total_amount_invested, config):
+def get_action_mask(global_state, player_total_amount_invested, config:Config):
     current_player_position = int(global_state[config.global_state_mapping["current_player"]])
     current_player_stack = global_state[config.global_state_mapping[f"player_{current_player_position}_stack"]]
     pot = global_state[config.global_state_mapping[f"pot"]]

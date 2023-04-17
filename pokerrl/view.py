@@ -132,8 +132,8 @@ def json_view(global_states, player_index, config):
     json_states = []
     for state in player_states:
         state_object = {
-            'hero_cards'                :state[config.global_state_mapping['hand_range'][0]:config.global_state_mapping['hand_range'][1]],
-            'board_cards'               :state[config.global_state_mapping['board_range'][0]:config.global_state_mapping['board_range'][1]],
+            'hero_cards'                :state[config.global_state_mapping['hand_range'][0]:config.global_state_mapping['hand_range'][1]].tolist(),
+            'board_cards'               :state[config.global_state_mapping['board_range'][0]:config.global_state_mapping['board_range'][1]].tolist(),
             'street'                    :state[config.global_state_mapping['street']],
             'num_players'               :state[config.global_state_mapping['num_players']],
             'hero_position'             :state[config.global_state_mapping['hero_position']],
