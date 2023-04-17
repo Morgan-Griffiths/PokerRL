@@ -168,4 +168,4 @@ def json_view(global_states, player_index, config:Config):
             'previous_bet_is_blind'     :state[config.player_state_mapping['previous_bet_is_blind']],
         }
         json_states.append(state_object)
-    return json.dumps(json_states)
+    return json_states

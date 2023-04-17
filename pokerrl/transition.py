@@ -134,7 +134,14 @@ def game_over(global_state:np.ndarray,config:Config,total_amount_invested:float)
                                         global_state[config.global_state_mapping[f'player_{position}_active']],
                                         hand_value,
                                         total_amount_invested[position]))
-    winnings = {p.position:0 for p in players}
+    winnings = {}
+    for p in players:
+        winnings[p.position] = {
+            'stack': p.stack,
+            'hand': p.hand,
+            'hand_value': p.hand_value,
+            'result': p.total_invested
+        }
     original = copy.copy(total_amount_invested)
     pot_players = copy.deepcopy(players)
     # Identify side pots and main pot
@@ -161,9 +168,9 @@ def game_over(global_state:np.ndarray,config:Config,total_amount_invested:float)
         player_winnings = pot / len(winners)
         for winner in winners:
             winner.stack += player_winnings
-            winnings[int(winner.position)] += player_winnings
+            winnings[winner.position]['result'] += player_winnings
     for p in players:
-        winnings[p.position] -= original[p.position] # subtract the amount invested
+        winnings[p.position]['result'] -= original[p.position]['result'] # subtract the amount invested
     # Reset game state here
     return winnings
 
