@@ -137,7 +137,6 @@ def game_over(global_state:np.ndarray,config:Config,total_amount_invested:float)
     winnings = {}
     for p in players:
         winnings[p.position] = {
-            'stack': p.stack,
             'hand': p.hand,
             'hand_value': p.hand_value,
             'result': p.total_invested
