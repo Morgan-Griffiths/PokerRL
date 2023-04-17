@@ -1,21 +1,73 @@
 # Poker environment for reinforcement learning
 
-To install the environment, pass in the config.
+To instantiate the environment, pass in the config.
 
 the config consists of the following parameters:
 
-- number of players
-- bet limit
-- bet sizes allowed
-- Game type [Holdem, OmahaHI]
+- number of players (2-6), default 2
+- bet limit (fixed limit, no limit, pot limit), default pot limit
+- bet sizes allowed (array of floats), default (1, 0.9, 0.75, 0.67, 0.5, 0.33, 0.25, 0.1)
+- Game type [Holdem, OmahaHI], default OmahaHI
 
-## Views
+## Example usage
 
-pass the global state into the view to get the view of the current player
+This is the recommended way to use the environment.
 
-## Actions
+```
+from pokerrl import Config, Game
 
-integer representating 1 of the available actions.
+config = Config(
+    num_players=2,
+    bet_limit=BetLimits.POT_LIMIT,
+    bet_sizes=[1, 0.5],
+    game_type=GameTypes.OMAHA_HI,
+)
+game = Game(config)
+player_state,done,winnings,action_mask = game.reset()
+while not done:
+  action = model(player_state)
+  player_state,done,winnings,action_mask = game.step(action)
+```
+
+## Play a game (both sides)
+
+```
+from pokerrl import play_game
+play_game()
+```
+
+## Example usage (low level)
+
+```
+from pokerrl import Config, init_state, step_state, GameTypes, BetLimits, player_view, Positions, get_current_player
+
+config = Config(
+    num_players=2,
+    bet_limit=BetLimits.POT_LIMIT,
+    bet_sizes=[1, 0.5],
+    game_type=GameTypes.OMAHA_HI,
+)
+global_state,done,winnings,action_mask = init_state(config)
+while not done:
+  player_idx = get_current_player(global_state)
+  player_state = player_view(global_state, player_idx)
+  action = model(player_state)
+  global_state,done,winnings,action_mask = step_state(global_state, action, config)
+```
+
+## Player view (low level)
+
+```
+from pokerrl import Config, init_state, step_state, GameTypes, BetLimits, player_view, Positions, get_current_player
+
+config = Config()
+global_state,done,winnings,action_mask = init_state(config)
+while not done:
+  player_idx = get_current_player(global_state)
+  human_readable_view(global_state,player_idx, config)
+  action = get_action(action_mask,global_state,config)
+  global_state,done,winnings,action_mask = step_state(global_state, action, config)
+```
 
 ## State
 
