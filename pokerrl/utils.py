@@ -19,8 +19,8 @@ def human_readable_cards(cards):
 def readable_card_to_int(card):
     return [rank_to_int[card[0]],suit_to_int[card[1]]]
 
-def return_current_player(global_state,config):
-    return int(global_state[-1,config.global_state_mapping['current_player']])
+def return_current_player(global_states,config):
+    return int(global_states[-1,config.global_state_mapping['current_player']])
 
 #### Action Mask Functions ####
 
@@ -105,10 +105,13 @@ def calculate_fixed_limit_mask(global_state,config,action,pot,current_player_inv
 def calculate_pot_limit_betsize(last_agro_action,last_agro_amount,config,action,pot,player_street_total,player_stack):
     if last_agro_action > StateActions.CALL:
         # find max raise -> call the raise, raise the pot
+        print('2 * last_agro_amount',2 * last_agro_amount)
+        print('pot - player_street_total',pot - player_street_total)
         max_raise = (2 * last_agro_amount) + (pot - player_street_total)
-        min_raise = last_agro_amount + (pot - player_street_total)
+        min_raise = max(last_agro_amount + (pot - player_street_total),config.blinds[0])
         bet_ratio = config.betsizes[action - (ModelActions.CALL+1)]
         bet_amount = min(max(max_raise * bet_ratio,min_raise),player_stack)
+        print("max raise: ",max_raise," min raise: ",min_raise," bet ratio: ",bet_ratio," bet amount: ",bet_amount)
         return RAISE, bet_amount
     else:
         # bet

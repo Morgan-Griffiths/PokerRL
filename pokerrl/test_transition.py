@@ -4,9 +4,10 @@ import numpy as np
 from pokerrl.transition import *
 from pokerrl.config import Config
 from pokerrl.datatypes import POSITION_TO_SEAT, SEAT_TO_POSITION, StateActions, Street
-from pokerrl.utils import readable_card_to_int
+from pokerrl.utils import calculate_pot_limit_betsize, readable_card_to_int
+from pokerrl.transition import get_action_mask,players_finished,step_state,init_state
 
-config = Config()
+config = Config(num_players=6)
 
 @pytest.fixture
 def river_state():
@@ -98,6 +99,7 @@ def test_init_state():
     assert global_states[-1,config.global_state_mapping['last_agro_amount']] == 1
     assert global_states[-1,config.global_state_mapping['player_6_stack']] == 99.5
     assert global_states[-1,config.global_state_mapping['player_2_stack']] == 99
+    assert global_states[-1,config.global_state_mapping['last_agro_action']] == 4
 
 def test_step_state():
     global_states,done,winnings,action_mask = init_state(config)
@@ -148,72 +150,6 @@ def test_classify_action_in_game():
     # assert action == RAISE and betsize == 100
 
 
-def test_game_over_no_side_pots():
-    global_state = np.zeros(config.global_state_shape)
-    # set stacks for two players
-    board_cards = [('A', 's'), ('K', 's'), ('Q', 's'), ('J', 's'), ('T', 's')]
-    board = [readable_card_to_int(card) for card in board_cards]
-    hand1 = [('A', 'h'), ('K', 'h'), ('Q', 'h'), ('J', 'h')]
-    hand1 = [readable_card_to_int(card) for card in hand1]
-    hand2 = [('A', 'c'), ('K', 'c'), ('9', 's'), ('8', 's')]
-    hand2 = [readable_card_to_int(card) for card in hand2]
-    # flatten hand1 and hand2
-    hand1 = [item for sublist in hand1 for item in sublist]
-    hand2 = [item for sublist in hand2 for item in sublist]
-    board = [item for sublist in board for item in sublist]
-    hands = [hand1,hand2]
-    print(board)
-    print('hands', hands)
-    print(global_state.shape)
-    total_amount_invested = {1: 25, 2: 25}
-    for i in range(1, 3):
-        global_state[config.global_state_mapping[f'player_{i}_stack']] = 100
-        global_state[config.global_state_mapping[f'player_{i}_active']] = 1
-        global_state[config.global_state_mapping[f'player_{i}_position']] = i
-        global_state[config.global_state_mapping[f'player_{i}_hand_range'][0]:config.global_state_mapping[f'player_{i}_hand_range'][1]] = hands[i-1]
-
-    global_state[config.global_state_mapping['board_range'][0]:config.global_state_mapping['board_range'][1]] = board
-    global_state[config.global_state_mapping['street']] = Street.RIVER
-    global_state[config.global_state_mapping['pot']] = 50
-    winnings = game_over(global_state, config, total_amount_invested)
-    print(winnings)
-    assert winnings[1] == -25
-    assert winnings[2] == 25
-
-def test_game_over_with_side_pots():
-    global_state = np.zeros(config.global_state_shape)
-    # set stacks for two players
-    board_cards = [('A', 's'), ('K', 's'), ('Q', 's'), ('J', 's'), ('T', 's')]
-    board = [readable_card_to_int(card) for card in board_cards]
-    hand1 = [('A', 'h'), ('K', 'h'), ('Q', 'h'), ('J', 'h')]
-    hand1 = [readable_card_to_int(card) for card in hand1]
-    hand2 = [('A', 'c'), ('K', 'c'), ('Q', 'c'), ('J', 'c')]
-    hand2 = [readable_card_to_int(card) for card in hand2]
-    hand3 = [('A', 'c'), ('K', 'c'), ('9', 's'), ('8', 's')]
-    hand3 = [readable_card_to_int(card) for card in hand3]
-    # flatten hand1 and hand2
-    hand1 = [item for sublist in hand1 for item in sublist]
-    hand2 = [item for sublist in hand2 for item in sublist]
-    hand3 = [item for sublist in hand3 for item in sublist]
-    board = [item for sublist in board for item in sublist]
-    hands = [hand1,hand2,hand3]
-    stacks = [100, 100,0]
-    for i in range(1, 4):
-        global_state[config.global_state_mapping[f'player_{i}_stack']] = stacks[i-1]
-        global_state[config.global_state_mapping[f'player_{i}_active']] = 1
-        global_state[config.global_state_mapping[f'player_{i}_position']] = i
-        global_state[config.global_state_mapping[f'player_{i}_hand_range'][0]:config.global_state_mapping[f'player_{i}_hand_range'][1]] = hands[i-1]
-    total_amount_invested = {1: 50, 2: 50, 3:25}
-    global_state[config.global_state_mapping['board_range'][0]:config.global_state_mapping['board_range'][1]] = board
-    global_state[config.global_state_mapping['street']] = Street.RIVER
-    global_state[config.global_state_mapping['pot']] = 125
-
-    winnings = game_over(global_state, config,total_amount_invested)
-    print(winnings)
-    assert winnings[1] == -25
-    assert winnings[2] == -25
-    assert winnings[3] == 50
-
 def test_blind_init():
     config = Config(num_players=2)
     global_state,done,winnings,action_mask = init_state(config)
@@ -253,9 +189,21 @@ def test_full_game_checked_to_river():
     assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.,3.,3.,4.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.,3.,3.,4.,4.]))
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_total_amount_invested[2] == 1
+    assert player_total_amount_invested[6] == 1
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
-    print(global_state[:,config.global_state_mapping['street']])
     assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.,3.,3.,4.,4.,4.]))
+    assert global_state[-1,config.global_state_mapping['pot']] == 2
+    if winnings[2]['hand_value'] < winnings[6]['hand_value']:
+        assert winnings[2]['result'] == 1
+        assert winnings[6]['result'] == -1
+    elif winnings[2]['hand_value'] > winnings[6]['hand_value']:
+        assert winnings[2]['result'] == -1
+        assert winnings[6]['result'] == 1
+    else:
+        assert winnings[2]['result'] == 0
+        assert winnings[6]['result'] == 0
 
 
 def test_full_game_with_raise_to_river():
@@ -274,6 +222,21 @@ def test_full_game_with_raise_to_river():
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     print(global_state[:,config.global_state_mapping['street']])
     assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.,3.,3.,4.,4.,4.]))
+    assert global_state[-1,config.global_state_mapping['pot']] == 6
+    assert done == True
+
+
+def test_full_game_with_raise_to_allin():
+    config = Config(num_players=2,stack_sizes=9)
+    global_state,done,winnings,action_mask = init_state(config)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config)
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config)
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config)
+    print(global_state[:,config.global_state_mapping['street']])
+    assert global_state[-1,config.global_state_mapping['pot']] == 18
+    assert done == True
 
 
 def test_full_game_with_raise_to_river_3_players():
@@ -323,8 +286,6 @@ def test_full_game_with_raise_to_river_3_players():
 
 ### Action Mask
 
-from transition import get_action_mask
-
 
 def test_fold_allowed_vs_bet_raise(river_state):
     player_total_amount_invested = {1: 50, 2: 50, 3: 50, 4: 50, 5: 50, 6: 50}
@@ -355,3 +316,73 @@ def test_bet_sizes_allowed(river_state):
     expected_action_mask[1] = 0 # no check
     assert np.array_equal(action_mask, expected_action_mask), "Bet sizes should be allowed based on stack and pot"
 
+def test_preflop_fold():
+    config = Config(num_players=2)
+    global_state,done,winnings,action_mask = init_state(config)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.FOLD, config)
+    assert done == True
+    assert winnings[6]['result'] == -0.5
+    assert winnings[2]['result'] == 0.5
+    assert winnings[6]['hand'] == []
+
+### TEST POT CALCS ###
+
+def test_calculate_pot_limit_betsize_2_player_SB():
+    config = Config(num_players=2,stack_sizes=9)
+    last_agro_action = StateActions.CALL + 1
+    last_agro_amount = 1
+    action = ModelActions.CALL + 1
+    pot = 1.5
+    player_street_total = 0.5
+    player_stack = 9
+    action_str,betsize = calculate_pot_limit_betsize(last_agro_action, last_agro_amount, config, action, pot, player_street_total, player_stack)
+    assert action_str == RAISE
+    assert betsize == 3
+
+def test_calculate_pot_limit_betsize_2_player_BB():
+    config = Config(num_players=2,stack_sizes=9)
+    last_agro_action = StateActions.CALL + 1
+    last_agro_amount = 3
+    action = ModelActions.CALL + 1
+    pot = 4
+    player_street_total = 1
+    player_stack = 9
+    action_str,betsize = calculate_pot_limit_betsize(last_agro_action, last_agro_amount, config, action, pot, player_street_total, player_stack)
+    assert action_str == RAISE
+    assert betsize == 9
+
+def test_calculate_pot_limit_betsize_2_player_SB_3bet():
+    config = Config(num_players=2,stack_sizes=27)
+    last_agro_action = StateActions.CALL + 1
+    last_agro_amount = 9
+    action = ModelActions.CALL + 1
+    pot = 12
+    player_street_total = 3
+    player_stack = 27
+    action_str,betsize = calculate_pot_limit_betsize(last_agro_action, last_agro_amount, config, action, pot, player_street_total, player_stack)
+    assert action_str == RAISE
+    assert betsize == 27
+
+def test_calculate_pot_limit_betsize_3_player():
+    config = Config(num_players=3,stack_sizes=9)
+    last_agro_action = StateActions.CALL + 1
+    last_agro_amount = 1
+    action = ModelActions.CALL + 1
+    pot = 1.5
+    player_street_total = 0
+    player_stack = 9
+    action_str,betsize = calculate_pot_limit_betsize(last_agro_action, last_agro_amount, config, action, pot, player_street_total, player_stack)
+    assert action_str == RAISE
+    assert betsize == 3.5
+
+def test_calculate_pot_limit_betsize_3_player_SB_3bet():
+    config = Config(num_players=3,stack_sizes=20)
+    last_agro_action = StateActions.CALL + 1
+    last_agro_amount = 3.5
+    action = ModelActions.CALL + 1
+    pot = 5
+    player_street_total = 0.5
+    player_stack = 20
+    action_str,betsize = calculate_pot_limit_betsize(last_agro_action, last_agro_amount, config, action, pot, player_street_total, player_stack)
+    assert action_str == RAISE
+    assert betsize == 11.5

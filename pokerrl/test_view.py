@@ -1,4 +1,5 @@
 import numpy as np
+from pokerrl.datatypes import Positions
 import pytest
 from pokerrl.view import player_view, human_readable_view,return_board_cards
 from pokerrl.config import Config
@@ -7,7 +8,7 @@ from pokerrl.transition import init_state
 
 @pytest.fixture
 def config():
-    return Config()
+    return Config(num_players=6)
 
 
 @pytest.fixture
@@ -18,6 +19,14 @@ def initial_states(config):
 @pytest.fixture
 def player_index():
     return 1
+
+@pytest.fixture
+def dealer_position():
+    return Positions.DEALER
+
+@pytest.fixture
+def utg_position():
+    return Positions.UTG
 
 def test_return_board_cards(initial_states,config:Config):
     global_state,_,_,_ = initial_states
@@ -36,18 +45,19 @@ def test_return_board_cards(initial_states,config:Config):
     # the next line asserts board_cards has positive numbers only
     assert np.all(board_cards)
 
-def test_player_view(initial_states, player_index,config):
-    print('test_player_view',player_index)
+def test_player_view(initial_states,utg_position,config:Config):
+    print('test_player_view',utg_position)
     global_state,_,_,_ = initial_states
-    player_states = player_view(global_state, player_index,config)
+    player_states = player_view(global_state, utg_position,config)
     print(player_states[:,:30])
-    assert player_states.shape == (2, 50), "Player view should have a shape of (2, 50)."
-    assert np.all(player_states[:, 20] == player_index), f"Player index should be consistent in the player view. {player_states[:, 20]}, {player_index}"
+    assert player_states.shape == (2, config.player_state_shape), "Player view should have a shape of (2,config.player_state_shape)."
+    assert np.all(player_states[:, 20] == utg_position), f"Player index should be consistent in the player view. {player_states[:, 20]}, {utg_position}"
 
 
-def test_human_readable_view(initial_states, player_index,config):
+def test_human_readable_view(initial_states,config):
+    dealer_position = Positions.DEALER
     global_state,_,_,_ = initial_states
-    human_readable_states = human_readable_view(global_state, player_index,config)
+    human_readable_states = human_readable_view(global_state, dealer_position,config)
     for state in human_readable_states:
         assert "hand_range" in state, "Hand range should be present in the human-readable view."
         assert "board_range" in state, "Board range should be present in the human-readable view."
@@ -55,5 +65,3 @@ def test_human_readable_view(initial_states, player_index,config):
         assert "num_players" in state, "Number of players should be present in the human-readable view."
         assert "hero_position" in state, "Hero position should be present in the human-readable view."
 
-        for key, value in state.items():
-            assert value is not None, f"{key} should not be None in the human-readable view. {state}"

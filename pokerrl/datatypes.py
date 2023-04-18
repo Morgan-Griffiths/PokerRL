@@ -20,11 +20,12 @@ class Positions:
     DEALER = 6
 
 class Player:
-    def __init__(self,position,stack,active,hand=None,total_invested=0):
-        self.position = position
+    def __init__(self,position,stack,active,hand=None,hand_value=None,total_invested=0):
+        self.position = int(position)
         self.stack = stack
         self.active = active
         self.hand = hand
+        self.hand_value = hand_value
         self.total_invested = total_invested
 
     def __repr__(self):

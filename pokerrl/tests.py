@@ -1,6 +1,6 @@
 import pytest
-from config import Config
-from transition import init_state
+from pokerrl.config import Config
+from pokerrl.transition import init_state
 import numpy as np
 
 from utils import return_deck
@@ -34,3 +34,4 @@ def test_return_deck():
     deck = return_deck()
     assert len(deck) == 52
     assert isinstance(deck, list)
+

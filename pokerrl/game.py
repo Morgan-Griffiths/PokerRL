@@ -17,7 +17,7 @@ class Game:
         current_player = return_current_player(self.global_state,self.config)
         if self.config.is_server:
             return {"game_states":json_view(self.global_state,current_player,self.config), "done":self.done, "winnings":self.winnings, "action_mask":self.action_mask.tolist()}
-        return player_view(self.global_state,current_player,self.config), self.done, self.winnings, self.action_mask
+        return self.global_state, self.done, self.winnings, self.action_mask
 
     def step(self,action):
         """ Returns (state, reward, done, info) from the current player's perspective """
@@ -25,4 +25,4 @@ class Game:
         current_player = return_current_player(self.global_state,self.config)
         if self.config.is_server:
             return {"game_states":json_view(self.global_state,current_player,self.config), "done":self.done, "winnings":self.winnings, "action_mask":self.action_mask.tolist()}
-        return player_view(self.global_state,current_player,self.config), self.done, self.winnings, self.action_mask
+        return self.global_state, self.done, self.winnings, self.action_mask

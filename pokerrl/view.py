@@ -44,7 +44,7 @@ def convert_global_state_to_player_view(global_state, player_index, config):
         "pot_odds",
         "street",
         "num_players",
-        "next_player",
+        "current_player",
         "previous_amount",
         "previous_position",
         "previous_action",
@@ -53,6 +53,7 @@ def convert_global_state_to_player_view(global_state, player_index, config):
         "last_agro_position",
         "last_agro_action",
         "last_agro_bet_is_blind",
+        "next_player",
     ]:
         player_state[pmap[key]] = global_state[gmap[key]]
     return player_state
@@ -113,7 +114,6 @@ def human_readable_view(global_states, player_index, config,display=False):
                 or "previous_amount" in key
                 or "previous_bet_is_blind" in key
                 or "next_player" in key
-                or "current_player" in key
                 or "last_agro_amount" in key
                 or "last_agro_position" in key
                 or "last_agro_action" in key
@@ -166,6 +166,8 @@ def json_view(global_states, player_index, config:Config):
             'previous_position'         :state[config.player_state_mapping['previous_position']],
             'previous_action'           :state[config.player_state_mapping['previous_action']],
             'previous_bet_is_blind'     :state[config.player_state_mapping['previous_bet_is_blind']],
+            "current_player"            :state[config.player_state_mapping['current_player']],
+            "next_player"               :state[config.player_state_mapping['next_player']],
         }
         json_states.append(state_object)
     return json_states

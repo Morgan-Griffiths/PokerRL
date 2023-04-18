@@ -83,8 +83,9 @@ def return_mappings(game_type):
             "previous_action": 47,
             "previous_bet_is_blind": 48,
             "next_player": 49,
+            "current_player": 50,
         }
-        player_state_shape = 50
+        player_state_shape = 51
 
         global_state_mapping = {
             "player_1_hand_range": [0, 8],
