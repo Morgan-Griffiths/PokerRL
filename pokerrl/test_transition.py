@@ -239,6 +239,157 @@ def test_full_game_with_raise_to_allin():
     assert done == True
 
 
+def test_full_game_with_raise_to_allin27():
+    config = Config(num_players=2,stack_sizes=27)
+    global_state,done,winnings,action_mask = init_state(config)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config)
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config)
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config)
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config)
+    print(global_state[:,config.global_state_mapping['street']])
+    assert global_state[-1,config.global_state_mapping['pot']] == 54
+    assert done == True
+
+
+def test_full_game_2p_allin():
+    config = Config(num_players=2,stack_sizes=100)
+    comparison_mask = np.zeros(11)
+    comparison_mask[0] = 1
+    comparison_mask[2] = 1
+    global_state,done,winnings,action_mask = init_state(config)
+    assert global_state[-1,config.global_state_mapping['pot']] == 1.5
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # SB
+    assert global_state[-1,config.global_state_mapping['pot']] == 4
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # BB
+    assert global_state[-1,config.global_state_mapping['pot']] == 12
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # SB betsize of 9
+    assert global_state[-1,config.global_state_mapping['pot']] == 18
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config) # BB
+    assert global_state[-1,config.global_state_mapping['pot']] == 18
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config) # SB
+    assert global_state[-1,config.global_state_mapping['pot']] == 18
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # BB betsize of 18, 73 left
+    assert global_state[-1,config.global_state_mapping['pot']] == 36
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # SB call of 18, 73 left
+    assert global_state[-1,config.global_state_mapping['pot']] == 54
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config)# BB betsize of 54. 19 left
+    assert global_state[-1,config.global_state_mapping['pot']] == 108
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # SB betsize of 81 allin
+    assert global_state[-1,config.global_state_mapping['pot']] == 181
+    assert np.array_equal(action_mask,comparison_mask)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # BB call of 19
+    assert global_state[-1,config.global_state_mapping['pot']] == 200
+    assert done == True
+
+def test_full_game_with_3p_raise_to_allin27():
+    config = Config(num_players=3,stack_sizes=27)
+    comparison_mask = np.zeros(11)
+    comparison_mask[0] = 1
+    comparison_mask[2] = 1
+    global_state,done,winnings,action_mask = init_state(config)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # 3.5
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # 11.5
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # 27
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.]))
+    assert np.array_equal(action_mask,comparison_mask)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # 23.5
+    assert np.array_equal(action_mask,comparison_mask)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # 15.5
+    
+    assert global_state[-1,config.global_state_mapping['player_1_stack']] == 0
+    assert global_state[-1,config.global_state_mapping['player_2_stack']] == 0
+    assert global_state[-1,config.global_state_mapping['player_6_stack']] == 0
+    assert global_state[-1,config.global_state_mapping['pot']] == 81
+    assert done == True
+
+
+def test_full_game_with_3p_raise_to_allin100():
+    config = Config(num_players=3,stack_sizes=100)
+    global_state,done,winnings,action_mask = init_state(config)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) #BTN 3.5
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) #SB 3.5
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # BB 14
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # BTN 10.5
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 14, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[1] == 3.5, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 14, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 14, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[1] == 3.5, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 14, f'{player_total_amount_invested}'
+
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # SB 10.5
+    # new street
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[1] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 0, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 14, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[1] == 14, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 14, f'{player_total_amount_invested}'
+    assert global_state[-1,config.global_state_mapping['pot']] == 42
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config) # SB 0
+    assert global_state[-1,config.global_state_mapping['pot']] == 42
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config) # BB 0
+    assert global_state[-1,config.global_state_mapping['pot']] == 42
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[1] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 0, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 14, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[1] == 14, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 14, f'{player_total_amount_invested}'
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # BTN 42
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[1] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 42, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 14, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[1] == 14, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 56, f'{player_total_amount_invested}'
+    assert global_state[-1,config.global_state_mapping['pot']] == 84
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.FOLD, config) # SB 0
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[1] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 42, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 14, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[1] == 14, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 56, f'{player_total_amount_invested}'
+    assert global_state[-1,config.global_state_mapping['pot']] == 84
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # BB 86
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 86, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[1] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 42, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 100, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[1] == 14, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 56, f'{player_total_amount_invested}'
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # BTN 44
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[1] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 0, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 100, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[1] == 14, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 100, f'{player_total_amount_invested}'
+    
+    assert global_state[-1,config.global_state_mapping['player_1_stack']] == 86
+    assert global_state[-1,config.global_state_mapping['player_2_stack']] == 0
+    assert global_state[-1,config.global_state_mapping['player_6_stack']] == 0
+    assert global_state[-1,config.global_state_mapping['pot']] == 214
+    assert done == True
+
+
+
 def test_full_game_with_raise_to_river_3_players():
     config = Config(num_players=3)
     global_state,done,winnings,action_mask = init_state(config)
@@ -309,9 +460,12 @@ def test_call_allowed(river_state):
     assert action_mask[2] == 1, "Call should be allowed when the last aggressive action is a bet or raise"
 
 
-def test_bet_sizes_allowed(river_state):
-    player_total_amount_invested = {1: 50, 2: 50, 3: 50, 4: 50, 5: 50, 6: 50}
-    action_mask = get_action_mask(river_state, player_total_amount_invested, config)
+def test_bet_sizes_allowed():
+    config = Config(num_players=2,stack_sizes=27)
+    global_state,done,winnings,action_mask = init_state(config)
+
+    # player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    # action_mask = get_action_mask(river_state, player_total_amount_invested, config)
     expected_action_mask = np.ones(config.num_actions, dtype=int)
     expected_action_mask[1] = 0 # no check
     assert np.array_equal(action_mask, expected_action_mask), "Bet sizes should be allowed based on stack and pot"
@@ -324,6 +478,15 @@ def test_preflop_fold():
     assert winnings[6]['result'] == -0.5
     assert winnings[2]['result'] == 0.5
     assert winnings[6]['hand'] == []
+
+
+def test_call_fold_only():
+    config = Config(num_players=2,stack_sizes=9)
+    global_state,done,winnings,action_mask = init_state(config)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # 3
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # 9
+    assert np.array_equal(action_mask,np.array([1,0,1,0,0,0,0,0,0,0,0]))
+    assert done == False
 
 ### TEST POT CALCS ###
 
@@ -363,6 +526,18 @@ def test_calculate_pot_limit_betsize_2_player_SB_3bet():
     assert action_str == RAISE
     assert betsize == 27
 
+def test_calculate_pot_limit_betsize_2_player_BB_4bet():
+    config = Config(num_players=2,stack_sizes=27)
+    last_agro_action = StateActions.CALL + 1
+    last_agro_amount = 27
+    action = ModelActions.CALL + 1
+    pot = 36
+    player_street_total = 9
+    player_stack = 81
+    action_str,betsize = calculate_pot_limit_betsize(last_agro_action, last_agro_amount, config, action, pot, player_street_total, player_stack)
+    assert action_str == RAISE
+    assert betsize == 81
+
 def test_calculate_pot_limit_betsize_3_player():
     config = Config(num_players=3,stack_sizes=9)
     last_agro_action = StateActions.CALL + 1
@@ -386,3 +561,50 @@ def test_calculate_pot_limit_betsize_3_player_SB_3bet():
     action_str,betsize = calculate_pot_limit_betsize(last_agro_action, last_agro_amount, config, action, pot, player_street_total, player_stack)
     assert action_str == RAISE
     assert betsize == 11.5
+
+### TEST RETURN INVESTMENTS
+
+def test_return_investments():
+    config = Config(num_players=2,stack_sizes=27)
+    global_state,done,winnings,action_mask = init_state(config)
+
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 1
+    assert player_amount_invested_per_street[6] == 0.5
+    assert player_total_amount_invested[2] == 1
+    assert player_total_amount_invested[6] == 0.5
+
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config)
+
+
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 1
+    assert player_amount_invested_per_street[6] == 3
+    assert player_total_amount_invested[2] == 1
+    assert player_total_amount_invested[6] == 3
+
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config)
+    
+    
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 9
+    assert player_amount_invested_per_street[6] == 3
+    assert player_total_amount_invested[2] == 9
+    assert player_total_amount_invested[6] == 3
+
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config)
+
+
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 9
+    assert player_amount_invested_per_street[6] == 27
+    assert player_total_amount_invested[2] == 9
+    assert player_total_amount_invested[6] == 27
+
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config)
+    assert done == True
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    # assert player_amount_invested_per_street[2] == 27
+    # assert player_amount_invested_per_street[6] == 27
+    # assert player_total_amount_invested[2] == 27
+    # assert player_total_amount_invested[6] == 27

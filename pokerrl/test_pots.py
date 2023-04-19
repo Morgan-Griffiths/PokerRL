@@ -34,14 +34,14 @@ def total_amount_invested_2():
 @pytest.fixture
 def example_pots(example_players):
     return [
-        (150, [example_players[0], example_players[1],example_players[2]]),
-        (100, [example_players[0], example_players[2]])
+        [150, [example_players[0], example_players[1],example_players[2]]],
+        [100, [example_players[0], example_players[2]]]
     ]
 
 def test_simple_pot(example_players):
     pots = get_pots([example_players[0],example_players[2]], {1: 100, 3: 100})
     assert pots == [
-        (200, [example_players[0],example_players[2]])
+        [200, [example_players[0],example_players[2]]]
     ]
 
 def test_get_pots(example_players, example_total_amount_invested,example_pots):
