@@ -1,10 +1,10 @@
-from pokerrl.utils import readable_card_to_int
+from pokerrl_env.utils import readable_card_to_int
 import pytest
 import numpy as np
 from typing import List, Tuple, Dict
-from pokerrl.config import Config
-from pokerrl.datatypes import Player, Street
-from pokerrl.transition import get_pots, calculate_winnings, game_over
+from pokerrl_env.config import Config
+from pokerrl_env.datatypes import Player, Street
+from pokerrl_env.transition import get_pots, calculate_winnings, game_over
 
 @pytest.fixture
 def example_players():

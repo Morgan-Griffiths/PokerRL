@@ -1,8 +1,8 @@
-from pokerrl.config import Config
-from pokerrl.datatypes import StateActions
-from pokerrl.utils import return_current_player
-from pokerrl.view import player_view, human_readable_view
-from pokerrl.transition import step_state,init_state
+from pokerrl_env.config import Config
+from pokerrl_env.datatypes import StateActions
+from pokerrl_env.utils import return_current_player
+from pokerrl_env.view import player_view, human_readable_view
+from pokerrl_env.transition import step_state,init_state
 
 def get_action(action_mask,global_states,config):
     readable_actions = ['FOLD','CHECK','CALL']

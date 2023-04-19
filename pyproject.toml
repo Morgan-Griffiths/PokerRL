@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pokerrl_env"
-version = "0.1.0"
+version = "0.1.1"
 description = "A poker environment for reinforcement learning"
 authors = ["Morgan Griffiths <rareducks101@yahoo.com>"]
 license = "MIT"

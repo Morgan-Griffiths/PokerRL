@@ -1,5 +1,5 @@
-from pokerrl.datatypes import CALL, CHECK, FOLD, INT_POSITIONS_BY_NUM_PLAYERS, PREFLOP_ORDER_BY_NUM_PLAYERS, POSITION_TO_SEAT, PLAYERS_POSITIONS_DICT, BetLimits, GameTypes, Street
-from pokerrl.utils import calculate_fixed_limit_mask, calculate_no_limit_betsize, calculate_pot_limit_betsize, calculate_pot_limit_mask, calculate_no_limit_mask, return_deck
+from pokerrl_env.datatypes import CALL, CHECK, FOLD, INT_POSITIONS_BY_NUM_PLAYERS, PREFLOP_ORDER_BY_NUM_PLAYERS, POSITION_TO_SEAT, PLAYERS_POSITIONS_DICT, BetLimits, GameTypes, Street
+from pokerrl_env.utils import calculate_fixed_limit_mask, calculate_no_limit_betsize, calculate_pot_limit_betsize, calculate_pot_limit_mask, calculate_no_limit_mask, return_deck
 
 class Config:
     def __init__(self, game_type=GameTypes.OMAHA_HI, num_players=2, bet_limit=BetLimits.POT_LIMIT,
