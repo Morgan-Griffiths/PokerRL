@@ -120,11 +120,8 @@ def get_pots(pot_players: List[Player], total_amount_invested: Dict[int, float])
     while pot_players:
         num_players = len(pot_players)
         min_invested = total_amount_invested[min(pot_players, key=lambda x: total_amount_invested[x.position]).position]
-        # print('min_invested',min_invested)
         pot = 0
         involved_players = []
-
-        # print('player',pot_players)
         players_to_remove = []
         for player in pot_players:
             involved_players.append(player)
@@ -135,10 +132,8 @@ def get_pots(pot_players: List[Player], total_amount_invested: Dict[int, float])
         for player in players_to_remove:
             pot_players.remove(player)
         pots.append([pot, involved_players])
-        # print('pots,pot_players',pots,len(pot_players))
         if num_players == len(pot_players):
             break
-    # print('total_amount_invested',total_amount_invested)
     if sum(total_amount_invested.values()) > 0:
         pots[-1][0] += sum(total_amount_invested.values())
     return pots
@@ -153,28 +148,20 @@ def calculate_winnings(pots: List[Tuple[float, List[Player]]], players: List[Pla
         }
     for pot, involved_players in pots:
         min_hand_rank = min(involved_players, key=lambda x: x.hand_value).hand_value
-        # print('min_hand_rank',min_hand_rank)
         winners = [player for player in involved_players if player.hand_value == min_hand_rank]
-        # print('winners',winners)
         player_winnings = pot / len(winners)
-        # print('player_winnings',player_winnings)
         for winner in winners:
             winner.stack += player_winnings
             winnings[winner.position]['result'] += player_winnings
-    # print('winnings',winnings)
     return winnings
 
 def game_over(global_state:np.ndarray,config:Config,total_amount_invested:float):
     # get all hand values
-    # print('game_over')
-    # print('pot',global_state[config.global_state_mapping['pot']])
-    # print('total_amount_invested',total_amount_invested)
     board = global_state[config.global_state_mapping[f'board_range'][0]:config.global_state_mapping[f'board_range'][1]]
     board = [int(h) for h in board]
     en_board = [encode(board[i*2:(i*2)+2]) for i in range(0,len(board)//2)]
     players = []
     for position in config.player_positions:
-        # print('position',position)
         hand_start = config.global_state_mapping[f'player_{position}_hand_range'][0]
         hand_end = config.global_state_mapping[f'player_{position}_hand_range'][1]
         player_hand = [int(h) for h in global_state[hand_start:hand_end]]
@@ -187,18 +174,14 @@ def game_over(global_state:np.ndarray,config:Config,total_amount_invested:float)
                                     hand_value=hand_value,
                                     total_invested=total_amount_invested[position]))
     
-    print('players',players)
     pot_players = [p for p in players if p.active > 0]
-    print('pot_players',pot_players)
     if len(pot_players) > 1:
         # accelerate street to river
         global_state[config.global_state_mapping['street']] = 4
     # Identify side pots and main pot
     pots = get_pots(pot_players, total_amount_invested)
-    print('pots',pots)
     # Find winners and distribute the pots
     winnings = calculate_winnings(pots, players)
-    # print('total winnings',winnings)
     return winnings
 
 def increment_players(global_state:np.ndarray,active_players:list,current_player:int,config:Config):
@@ -206,7 +189,6 @@ def increment_players(global_state:np.ndarray,active_players:list,current_player
     global_state[config.global_state_mapping['current_player']] = global_state[config.global_state_mapping['next_player']]
     non_zero_players = [p for p in active_players if p.stack > 0]
     player_idx = [p.position for p in non_zero_players].index(current_player)
-    # print('player_idx',player_idx)
     for player in non_zero_players:
         if player.position == current_player:
             next_player = non_zero_players[(player_idx + 2) % len(non_zero_players)]
@@ -254,47 +236,26 @@ def return_investments(global_states,config:Config):
 def step_state(global_states:np.ndarray, action:int, config:Config):
     """ Step the state forward by one action. Record the total amount invested by each player per street. """
     player_amount_invested_per_street, player_total_amount_invested = return_investments(global_states,config)
-    # print street
-    print('street',global_states[-1][config.global_state_mapping['street']])
-    print('player_total_amount_invested',player_total_amount_invested)
-    print('player_amount_invested_per_street',player_amount_invested_per_street)
     
     # calculate next state
     global_state = np.copy(global_states[-1])
     active_players = order_players_by_street(global_state,config)
     current_player = int(global_state[config.global_state_mapping['current_player']])
-    print('current_player',current_player)
-    print('active_players',active_players)
     # Get action details
-    try:
-        print('inputs','action',action,'player_amount_invested_per_street',player_amount_invested_per_street[current_player],'player_stack',global_state[config.global_state_mapping[f'player_{current_player}_stack']],'last_agro_amount',global_state[config.global_state_mapping['last_agro_amount']],'last_agro_action',global_state[config.global_state_mapping['last_agro_action']],'pot',global_state[config.global_state_mapping['pot']])
-        action_category,betsize = classify_action(action, player_amount_invested_per_street[current_player], global_state[config.global_state_mapping[f'player_{current_player}_stack']], global_state[config.global_state_mapping['last_agro_amount']],global_state[config.global_state_mapping['last_agro_action']],global_state[config.global_state_mapping['pot']],config)
-    except Exception as e:
-        print('action',action)
-        print('player_amount_invested_per_street',player_amount_invested_per_street[current_player])
-        print('player_stack',global_state[config.global_state_mapping[f'player_{current_player}_stack']])
-        print('last_agro_amount',global_state[config.global_state_mapping['last_agro_amount']])
-        print('last_agro_action',global_state[config.global_state_mapping['last_agro_action']])
-        print('pot',global_state[config.global_state_mapping['pot']])
-        raise e
-    print('action',action_category,betsize)
-    print('player_amount_invested_per_street',player_amount_invested_per_street)
+    action_category,betsize = classify_action(action, player_amount_invested_per_street[current_player], global_state[config.global_state_mapping[f'player_{current_player}_stack']], global_state[config.global_state_mapping['last_agro_amount']],global_state[config.global_state_mapping['last_agro_action']],global_state[config.global_state_mapping['pot']],config)
     player_total_amount_invested[current_player] += betsize
     global_state[config.global_state_mapping[f'pot']] += betsize
-    print('prior player stack',global_state[config.global_state_mapping[f'player_{current_player}_stack']])
     if action_category == RAISE:
         global_state[config.global_state_mapping[f'player_{current_player}_stack']] -= betsize - player_amount_invested_per_street[current_player]
     else:
         global_state[config.global_state_mapping[f'player_{current_player}_stack']] -= betsize
 
-    print('post player stack',global_state[config.global_state_mapping[f'player_{current_player}_stack']])
     global_state[config.global_state_mapping[f'previous_action']] = config.convert_model_action_to_state(action)
     global_state[config.global_state_mapping[f'previous_position']] = current_player
     global_state[config.global_state_mapping[f'previous_amount']] = betsize
     global_state[config.global_state_mapping[f'previous_bet_is_blind']] = 0
     done = False
     winnings = {position:{'hand_value':0,'hand':[],'result':0} for position in config.player_positions}
-    # print('street',global_state[config.global_state_mapping[f'street']])
     if action_category in [BET, RAISE]:
         # Subtract the amount already invested.
         global_state[config.global_state_mapping[f'pot']] -= player_amount_invested_per_street[current_player]
@@ -307,7 +268,6 @@ def step_state(global_states:np.ndarray, action:int, config:Config):
         increment_players(global_state,active_players,current_player,config)
 
     elif action_category == CHECK:
-        # print('check')
         if current_player == active_players[-1].position:
             # end of street
             if global_state[config.global_state_mapping[f'street']] == Street.RIVER:
@@ -321,36 +281,27 @@ def step_state(global_states:np.ndarray, action:int, config:Config):
         else:
             increment_players(global_state,active_players,current_player,config)
     elif action_category == CALL:
-        print('call')
-        # print('call',current_player,global_state[config.global_state_mapping['next_player']],global_state[config.global_state_mapping['last_agro_position']])
         # Special case preflop blind situation.
         if global_state[config.global_state_mapping['street']] == Street.PREFLOP and \
             global_state[config.global_state_mapping['last_agro_amount']] == config.blinds[1] and \
             global_state[config.global_state_mapping['next_player']] == Positions.BIG_BLIND and \
             global_state[config.global_state_mapping[f'last_agro_position']] == Positions.BIG_BLIND:
-            print('special case preflop blind situation')
             # bb can raise, or check
             increment_players(global_state,active_players,current_player,config)
         elif global_state[config.global_state_mapping['next_player']] == global_state[config.global_state_mapping['last_agro_position']] or len(active_players) == 1 or global_state[config.global_state_mapping['last_agro_position']] not in active_players and is_next_player_the_aggressor(active_players,current_player,global_state[config.global_state_mapping['last_agro_position']]):
-            print('next_player == last_agro_position',global_state[config.global_state_mapping['next_player']],global_state[config.global_state_mapping['last_agro_position']])
             # end of round. last street or all players allin
             if global_state[config.global_state_mapping['street']] == Street.RIVER or players_finished(global_state, config):
                 # end of game
                 done = True
                 winnings = game_over(global_state,config,player_total_amount_invested)
             else:
-                print('updating street')
                 # update street
                 global_state[config.global_state_mapping['street']] += 1
                 clear_last_agro_action(global_state,config)
                 new_street_player_order(global_state,config)
         else:
-            print('incrementing players')
-            print('next_player',global_state[config.global_state_mapping['next_player']])
-            print('last_agro_position',global_state[config.global_state_mapping['last_agro_position']])
             increment_players(global_state,active_players,current_player,config)
     elif action_category == FOLD:
-        print('current_player fold',current_player)
         global_state[config.global_state_mapping[f'player_{current_player}_active']] = 0
         # check for end of game
         if players_finished(global_state, config):
@@ -361,7 +312,6 @@ def step_state(global_states:np.ndarray, action:int, config:Config):
             global_state[config.global_state_mapping['last_agro_amount']] == config.blinds[1] and \
             global_state[config.global_state_mapping['next_player']] == Positions.BIG_BLIND and \
             global_state[config.global_state_mapping[f'last_agro_position']] == Positions.BIG_BLIND:
-            print('special case preflop blind situation')
             # bb can raise, or check
             increment_players(global_state,active_players,current_player,config)
         elif global_state[config.global_state_mapping['next_player']] == global_state[config.global_state_mapping['last_agro_position']]:

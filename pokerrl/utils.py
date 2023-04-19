@@ -31,8 +31,6 @@ def is_next_player_the_aggressor(active_players:List[Player], current_player:int
         next_player_position + 6
     distance_to_agro = (last_agro_position - current_player) % 6
     distance_to_next = (next_player_position - current_player) % 6
-    print('distance_to_agro',distance_to_agro)
-    print('distance_to_next',distance_to_next)
     return distance_to_next > distance_to_agro
     
 
@@ -43,10 +41,6 @@ def calculate_pot_limit_mask(global_state,config,pot,current_player_investment,c
     if global_state[config.global_state_mapping["last_agro_action"]] > ModelActions.CALL:
         max_raise = (pot - current_player_investment) + (2 * global_state[config.global_state_mapping["last_agro_amount"]])
         max_bet = min(current_player_stack+current_player_investment,max_raise)
-        print('current_player_investment',current_player_investment)
-        print('current_player_stack',current_player_stack)
-        print('max_bet',max_bet)
-        print('last_agro_amount',global_state[config.global_state_mapping["last_agro_amount"]])
         if max_bet <= global_state[config.global_state_mapping["last_agro_amount"]]:
             max_bet = 0
 
@@ -126,15 +120,10 @@ def calculate_fixed_limit_mask(global_state,config,action,pot,current_player_inv
 def calculate_pot_limit_betsize(last_agro_action,last_agro_amount,config,action,pot,player_street_total,player_stack):
     if last_agro_action > StateActions.CALL:
         # find max raise -> call the raise, raise the pot
-        print('2 * last_agro_amount',2 * last_agro_amount)
-        print('pot,player_street_total',pot,player_street_total)
         max_raise = (2 * last_agro_amount) + (pot - player_street_total)
         min_raise = max(last_agro_amount + (pot - player_street_total),config.blinds[0])
         bet_ratio = config.betsizes[action - (ModelActions.CALL+1)]
         bet_amount = min(max(max_raise * bet_ratio,min_raise),player_stack + player_street_total)
-        print('max',max(max_raise * bet_ratio,min_raise))
-        print('player_stack + player_street_total',player_stack + player_street_total)
-        print("max raise: ",max_raise," min raise: ",min_raise," bet ratio: ",bet_ratio," bet amount: ",bet_amount)
         return RAISE, bet_amount
     else:
         # bet
