@@ -1,9 +1,9 @@
 import numpy as np
-from pokerrl.datatypes import Positions
+from pokerrl_env.datatypes import Positions
 import pytest
-from pokerrl.view import player_view, human_readable_view,return_board_cards
-from pokerrl.config import Config
-from pokerrl.transition import init_state
+from pokerrl_env.view import player_view, human_readable_view,return_board_cards
+from pokerrl_env.config import Config
+from pokerrl_env.transition import init_state
 
 
 @pytest.fixture

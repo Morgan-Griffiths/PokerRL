@@ -1,8 +1,7 @@
-import json
 import numpy as np
-from pokerrl.config import Config
-from pokerrl.datatypes import BOARD_CARDS_GIVEN_STREET, SEAT_TO_POSITION, INT_TO_STREET
-from pokerrl.utils import human_readable_cards
+from pokerrl_env.config import Config
+from pokerrl_env.datatypes import BOARD_CARDS_GIVEN_STREET, SEAT_TO_POSITION, INT_TO_STREET
+from pokerrl_env.utils import human_readable_cards
 
 
 def return_board_cards(global_state, config):

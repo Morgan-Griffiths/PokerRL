@@ -1,7 +1,7 @@
-from pokerrl.transition import init_state, step_state
-from pokerrl.config import Config
-from pokerrl.utils import return_current_player
-from pokerrl.view import player_view,json_view
+from pokerrl_env.transition import init_state, step_state
+from pokerrl_env.config import Config
+from pokerrl_env.utils import return_current_player
+from pokerrl_env.view import player_view,json_view
 
 class Game:
     def __init__(self,config:Config):

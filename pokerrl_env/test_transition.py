@@ -1,11 +1,11 @@
 
 import pytest
 import numpy as np
-from pokerrl.transition import *
-from pokerrl.config import Config
-from pokerrl.datatypes import POSITION_TO_SEAT, SEAT_TO_POSITION, StateActions, Street
-from pokerrl.utils import calculate_pot_limit_betsize, readable_card_to_int
-from pokerrl.transition import get_action_mask,players_finished,step_state,init_state
+from pokerrl_env.transition import *
+from pokerrl_env.config import Config
+from pokerrl_env.datatypes import POSITION_TO_SEAT, SEAT_TO_POSITION, StateActions, Street
+from pokerrl_env.utils import calculate_pot_limit_betsize, readable_card_to_int
+from pokerrl_env.transition import get_action_mask,players_finished,step_state,init_state
 
 config = Config(num_players=6)
 

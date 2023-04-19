@@ -1,9 +1,9 @@
 from typing import Dict, List, Tuple
 import numpy as np
-from pokerrl.config import Config
-from pokerrl.datatypes import PLAYER_ORDER_BY_STREET, POSITION_TO_SEAT,RAISE,CALL,FOLD,BET,CHECK, ModelActions, StateActions,Street,Player,Positions
-from pokerrl.cardlib import encode, hand_rank
-from pokerrl.utils import is_next_player_the_aggressor, return_deck
+from pokerrl_env.config import Config
+from pokerrl_env.datatypes import PLAYER_ORDER_BY_STREET, POSITION_TO_SEAT,RAISE,CALL,FOLD,BET,CHECK, ModelActions, StateActions,Street,Player,Positions
+from pokerrl_env.cardlib import encode, hand_rank
+from pokerrl_env.utils import is_next_player_the_aggressor, return_deck
 import copy
 
 def init_state(config: Config):

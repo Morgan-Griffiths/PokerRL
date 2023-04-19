@@ -1,5 +1,5 @@
 from typing import List
-from pokerrl.datatypes import BET, RAISE, ModelActions, Player, StateActions, Street,Positions, int_to_rank, int_to_suit,rank_to_int,suit_to_int
+from pokerrl_env.datatypes import BET, RAISE, ModelActions, Player, StateActions, Street,Positions, int_to_rank, int_to_suit,rank_to_int,suit_to_int
 from random import shuffle
 import numpy as np
 

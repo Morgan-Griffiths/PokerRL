@@ -1,8 +1,8 @@
-from pokerrl.datatypes import BetLimits, GameTypes, Player, Positions
-from pokerrl.utils import is_next_player_the_aggressor,return_deck
+from pokerrl_env.datatypes import BetLimits, GameTypes, Player, Positions
+from pokerrl_env.utils import is_next_player_the_aggressor,return_deck
 import pytest
-from pokerrl.config import Config
-from pokerrl.transition import init_state
+from pokerrl_env.config import Config
+from pokerrl_env.transition import init_state
 import numpy as np
 
 
