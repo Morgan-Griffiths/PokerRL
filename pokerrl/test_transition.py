@@ -435,6 +435,20 @@ def test_full_game_with_raise_to_river_3_players():
     print(global_state[:,config.global_state_mapping['street']])
     assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.,3.,4.,4.,4.,4.]))
 
+
+def test_full_game_with_3p_BTN_Call():
+    config = Config(num_players=3,stack_sizes=100)
+    global_state,done,winnings,action_mask = init_state(config)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # 1
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # 11.5
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config) # 27
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # SB 
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # BB call
+    assert global_state[-1,config.global_state_mapping['current_player']] == Positions.DEALER
+
+
 ### Action Mask
 
 
