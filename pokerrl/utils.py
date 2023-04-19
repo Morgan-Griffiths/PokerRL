@@ -1,4 +1,5 @@
-from pokerrl.datatypes import BET, RAISE, ModelActions, StateActions, Street,Positions, int_to_rank, int_to_suit,rank_to_int,suit_to_int
+from typing import List
+from pokerrl.datatypes import BET, RAISE, ModelActions, Player, StateActions, Street,Positions, int_to_rank, int_to_suit,rank_to_int,suit_to_int
 from random import shuffle
 import numpy as np
 
@@ -22,13 +23,33 @@ def readable_card_to_int(card):
 def return_current_player(global_states,config):
     return int(global_states[-1,config.global_state_mapping['current_player']])
 
+def is_next_player_the_aggressor(active_players:List[Player], current_player:int, last_agro_position:int):
+    """ for when the aggressor is allin and is not in active players. """
+    current_player_index = [player.position for player in active_players].index(current_player)
+    next_player_position = active_players[(current_player_index + 1) % len(active_players)].position
+    if next_player_position < current_player:
+        next_player_position + 6
+    distance_to_agro = (last_agro_position - current_player) % 6
+    distance_to_next = (next_player_position - current_player) % 6
+    print('distance_to_agro',distance_to_agro)
+    print('distance_to_next',distance_to_next)
+    return distance_to_next > distance_to_agro
+    
+
 #### Action Mask Functions ####
 
 def calculate_pot_limit_mask(global_state,config,pot,current_player_investment,current_player_stack):
     action_mask = np.zeros(config.num_actions, dtype=int)  # +2 for check and fold
     if global_state[config.global_state_mapping["last_agro_action"]] > ModelActions.CALL:
         max_raise = (pot - current_player_investment) + (2 * global_state[config.global_state_mapping["last_agro_amount"]])
-        max_bet = min(current_player_stack,max_raise)
+        max_bet = min(current_player_stack+current_player_investment,max_raise)
+        print('current_player_investment',current_player_investment)
+        print('current_player_stack',current_player_stack)
+        print('max_bet',max_bet)
+        print('last_agro_amount',global_state[config.global_state_mapping["last_agro_amount"]])
+        if max_bet <= global_state[config.global_state_mapping["last_agro_amount"]]:
+            max_bet = 0
+
         # check for special case preflop blind situation.
         if global_state[config.global_state_mapping["street"]] == Street.PREFLOP and \
             global_state[config.global_state_mapping["current_player"]] == Positions.BIG_BLIND and \
@@ -106,11 +127,13 @@ def calculate_pot_limit_betsize(last_agro_action,last_agro_amount,config,action,
     if last_agro_action > StateActions.CALL:
         # find max raise -> call the raise, raise the pot
         print('2 * last_agro_amount',2 * last_agro_amount)
-        print('pot - player_street_total',pot - player_street_total)
+        print('pot,player_street_total',pot,player_street_total)
         max_raise = (2 * last_agro_amount) + (pot - player_street_total)
         min_raise = max(last_agro_amount + (pot - player_street_total),config.blinds[0])
         bet_ratio = config.betsizes[action - (ModelActions.CALL+1)]
-        bet_amount = min(max(max_raise * bet_ratio,min_raise),player_stack)
+        bet_amount = min(max(max_raise * bet_ratio,min_raise),player_stack + player_street_total)
+        print('max',max(max_raise * bet_ratio,min_raise))
+        print('player_stack + player_street_total',player_stack + player_street_total)
         print("max raise: ",max_raise," min raise: ",min_raise," bet ratio: ",bet_ratio," bet amount: ",bet_amount)
         return RAISE, bet_amount
     else:
@@ -125,7 +148,7 @@ def calculate_no_limit_betsize(last_agro_action,last_agro_amount,config,action,p
         # find max raise -> call the raise, raise the pot
         min_raise = last_agro_amount + (pot - player_street_total)
         bet_ratio = config.betsizes[action - (ModelActions.CALL+1)]
-        bet_amount = min(max(min_raise * bet_ratio,min_raise),player_stack)
+        bet_amount = min(max(min_raise * bet_ratio,min_raise),player_stack + player_street_total)
         return RAISE, bet_amount
     else:
         # bet
@@ -140,7 +163,7 @@ def calculate_fixed_limit_betsize(last_agro_action,last_agro_amount,config,actio
         # find max raise -> call the raise, raise the pot
         max_raise = (2 * last_agro_amount) + (pot - player_street_total)
         bet_ratio = config.betsizes[action - (ModelActions.CALL+1)]
-        bet_amount = min(max_raise * bet_ratio,player_stack)
+        bet_amount = min(max_raise * bet_ratio,player_stack + player_street_total)
         return RAISE, bet_amount
     else:
         # bet
