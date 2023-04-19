@@ -331,12 +331,6 @@ def step_state(global_states:np.ndarray, action:int, config:Config):
             print('special case preflop blind situation')
             # bb can raise, or check
             increment_players(global_state,active_players,current_player,config)
-        # or last aggressor is allin and would be the next player.
-        # 4 allin 2,3 -> 4
-        # 5 2 -> 4
-        # 5 6 -> 4
-        # (allin - current) % 6
-        # current - vil = 1,-3,1
         elif global_state[config.global_state_mapping['next_player']] == global_state[config.global_state_mapping['last_agro_position']] or len(active_players) == 1 or global_state[config.global_state_mapping['last_agro_position']] not in active_players and is_next_player_the_aggressor(active_players,current_player,global_state[config.global_state_mapping['last_agro_position']]):
             print('next_player == last_agro_position',global_state[config.global_state_mapping['next_player']],global_state[config.global_state_mapping['last_agro_position']])
             # end of round. last street or all players allin
@@ -363,6 +357,13 @@ def step_state(global_states:np.ndarray, action:int, config:Config):
             # end game
             done = True
             winnings = game_over(global_state,config,player_total_amount_invested)
+        elif global_state[config.global_state_mapping['street']] == Street.PREFLOP and \
+            global_state[config.global_state_mapping['last_agro_amount']] == config.blinds[1] and \
+            global_state[config.global_state_mapping['next_player']] == Positions.BIG_BLIND and \
+            global_state[config.global_state_mapping[f'last_agro_position']] == Positions.BIG_BLIND:
+            print('special case preflop blind situation')
+            # bb can raise, or check
+            increment_players(global_state,active_players,current_player,config)
         elif global_state[config.global_state_mapping['next_player']] == global_state[config.global_state_mapping['last_agro_position']]:
             # end of round
             if global_state[config.global_state_mapping['street']] == Street.RIVER:

@@ -449,6 +449,19 @@ def test_full_game_with_3p_BTN_Call():
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.DEALER
 
 
+def test_full_game_with_3p_BTN_Call_SB_FOLD():
+    config = Config(num_players=3,stack_sizes=100)
+    global_state,done,winnings,action_mask = init_state(config)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # 1
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.FOLD, config) # 11.5
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config) # 27
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # SB 
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # BB call
+    assert global_state[-1,config.global_state_mapping['current_player']] == Positions.BIG_BLIND
+
+
 ### Action Mask
 
 
