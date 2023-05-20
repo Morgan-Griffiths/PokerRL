@@ -170,30 +170,30 @@ def test_full_game_checked_to_river():
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.BIG_BLIND
     assert global_state[-1,config.global_state_mapping['next_player']] == Positions.DEALER
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.DEALER
     assert global_state[-1,config.global_state_mapping['next_player']] == Positions.BIG_BLIND
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.BIG_BLIND
     assert global_state[-1,config.global_state_mapping['next_player']] == Positions.DEALER
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.,3.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.DEALER
     assert global_state[-1,config.global_state_mapping['next_player']] == Positions.BIG_BLIND
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.,3.,3.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.BIG_BLIND
     assert global_state[-1,config.global_state_mapping['next_player']] == Positions.DEALER
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.,3.,3.,4.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.,3.,4.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.,3.,3.,4.,4.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.,3.,4.,4.]))
     player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
     assert player_total_amount_invested[2] == 1
     assert player_total_amount_invested[6] == 1
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.,3.,3.,4.,4.,4.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.,3.,4.,4.,4.]))
     assert global_state[-1,config.global_state_mapping['pot']] == 2
     if winnings[2]['hand_value'] < winnings[6]['hand_value']:
         assert winnings[2]['result'] == 1
@@ -212,16 +212,16 @@ def test_full_game_with_raise_to_river():
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config)
     assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config)
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     print(global_state[:,config.global_state_mapping['street']])
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,2.,2.,3.,3.,4.,4.,4.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.,3.,4.,4.,4.]))
     assert global_state[-1,config.global_state_mapping['pot']] == 6
     assert done == True
 
@@ -375,9 +375,9 @@ def test_full_game_with_3p_raise_to_allin100():
     assert player_total_amount_invested[6] == 56, f'{player_total_amount_invested}'
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # BTN 44
     player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
-    assert player_amount_invested_per_street[2] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[2] == 86, f'{player_amount_invested_per_street}'
     assert player_amount_invested_per_street[1] == 0, f'{player_amount_invested_per_street}'
-    assert player_amount_invested_per_street[6] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 86, f'{player_amount_invested_per_street}'
     assert player_total_amount_invested[2] == 100, f'{player_total_amount_invested}'
     assert player_total_amount_invested[1] == 14, f'{player_total_amount_invested}'
     assert player_total_amount_invested[6] == 100, f'{player_total_amount_invested}'
@@ -404,36 +404,36 @@ def test_full_game_with_raise_to_river_3_players():
     assert global_state[-1,config.global_state_mapping['next_player']] == Positions.DEALER
     assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.]))
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.SMALL_BLIND
     assert global_state[-1,config.global_state_mapping['next_player']] == Positions.BIG_BLIND
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.BIG_BLIND
     assert global_state[-1,config.global_state_mapping['next_player']] == Positions.DEALER
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.,2.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.DEALER
     assert global_state[-1,config.global_state_mapping['next_player']] == Positions.SMALL_BLIND
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.,2.,2.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.SMALL_BLIND
     assert global_state[-1,config.global_state_mapping['next_player']] == Positions.BIG_BLIND
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.,2.,2.,2.,3.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.,2.,2.,2.,3.,3.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.,3.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.,2.,2.,2.,3.,3.,3.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.,3.,4.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.,2.,2.,2.,3.,3.,3.,3.,4.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.,3.,4.,4.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.,2.,2.,2.,3.,3.,3.,3.,4.,4.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     assert done == False
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.,3.,4.,4.,4.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.,2.,2.,2.,3.,3.,3.,3.,4.,4.,4.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config)
     assert done == True
     print(global_state[:,config.global_state_mapping['street']])
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.,2.,3.,3.,3.,4.,4.,4.,4.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.,2.,2.,2.,3.,3.,3.,3.,4.,4.,4.,4.]))
 
 
 def test_full_game_with_3p_BTN_Call():
@@ -443,7 +443,7 @@ def test_full_game_with_3p_BTN_Call():
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # 11.5
     assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config) # 27
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # SB 
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # BB call
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.DEALER
@@ -456,11 +456,60 @@ def test_full_game_with_3p_BTN_Call_SB_FOLD():
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.FOLD, config) # 11.5
     assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CHECK, config) # 27
-    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,1.,2.]))
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # SB 
     global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # BB call
     assert global_state[-1,config.global_state_mapping['current_player']] == Positions.BIG_BLIND
 
+
+def test_full_game_with_2p_BTN_Call_SB_FOLD():
+    config = Config(num_players=2,stack_sizes=100)
+    mask = np.ones((config.num_actions))
+    mask[1] = 0
+    mask[3] = 0
+    mask[4] = 0
+    global_state,done,winnings,action_mask = init_state(config)
+    assert np.array_equal(global_state[:,config.global_state_mapping['current_player']],np.array([2.,6.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL+1, config) # SB 3
+    assert np.array_equal(global_state[:,config.global_state_mapping['current_player']],np.array([2.,6.,2.]))
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL, config) # BB 3
+    assert np.array_equal(global_state[:,config.global_state_mapping['current_player']],np.array([2.,6.,2.,2.,2.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.]))
+    print('current_player',global_state[:,config.global_state_mapping['current_player']])
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 0, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 0, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 3, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 3, f'{player_total_amount_invested}'
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL+1, config) # BB 6
+    assert np.array_equal(global_state[:,config.global_state_mapping['current_player']],np.array([2.,6.,2.,2.,2.,6.]))
+    assert np.array_equal(global_state[:,config.global_state_mapping['street']],np.array([1.,1.,1.,1.,2.,2.]))
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 6, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 0, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 9, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 3, f'{player_total_amount_invested}'
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # SB 24
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 6, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 24, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 9, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 27, f'{player_total_amount_invested}'
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 1, config) # BB 78
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 78, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 24, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 81, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 27, f'{player_total_amount_invested}'
+    assert np.array_equal(action_mask,mask)
+    global_state,done,winnings,action_mask = step_state(global_state, ModelActions.CALL + 3, config) # SB 100
+
+    player_amount_invested_per_street, player_total_amount_invested = return_investments(global_state, config)
+    assert player_amount_invested_per_street[2] == 78, f'{player_amount_invested_per_street}'
+    assert player_amount_invested_per_street[6] == 97, f'{player_amount_invested_per_street}'
+    assert player_total_amount_invested[2] == 81, f'{player_total_amount_invested}'
+    assert player_total_amount_invested[6] == 100, f'{player_total_amount_invested}'
+    assert global_state[-1,config.global_state_mapping['current_player']] == Positions.BIG_BLIND
 
 ### Action Mask
 

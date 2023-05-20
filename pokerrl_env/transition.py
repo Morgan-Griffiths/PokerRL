@@ -77,6 +77,12 @@ def init_state(config: Config):
     player_totals[POSITION_TO_SEAT["Big Blind"]] = config.blinds[1]
     return np.stack((state_SB, state_BB), axis=0),done,winnings,get_action_mask(state_BB,player_totals,config)
 
+def clear_previous_action(global_state,config:Config):
+    global_state[config.global_state_mapping[f'previous_action']] = 0
+    global_state[config.global_state_mapping[f'previous_position']] = 0
+    global_state[config.global_state_mapping[f'previous_amount']] = 0
+    global_state[config.global_state_mapping[f'previous_bet_is_blind']] = 0
+
 def clear_last_agro_action(global_state,config:Config):
     global_state[config.global_state_mapping[f'last_agro_action']] = 0
     global_state[config.global_state_mapping[f'last_agro_position']] = 0
@@ -175,9 +181,12 @@ def game_over(global_state:np.ndarray,config:Config,total_amount_invested:float)
                                     total_invested=total_amount_invested[position]))
     
     pot_players = [p for p in players if p.active > 0]
-    if len(pot_players) > 1:
+
+    if len(pot_players) > 1 and global_state[config.global_state_mapping['street']] < 4:
         # accelerate street to river
-        global_state[config.global_state_mapping['street']] = 4
+        print('Accelerating street to river')
+        global_state = create_next_state(global_state,config,street=4)
+        print(global_state.shape)
     # Identify side pots and main pot
     pots = get_pots(pot_players, total_amount_invested)
     # Find winners and distribute the pots
@@ -186,20 +195,37 @@ def game_over(global_state:np.ndarray,config:Config,total_amount_invested:float)
 
 def increment_players(global_state:np.ndarray,active_players:list,current_player:int,config:Config):
     """ Skip players with stack 0. Which can happen if a player when allin but there are 2+ active players remaining """
-    global_state[config.global_state_mapping['current_player']] = global_state[config.global_state_mapping['next_player']]
-    non_zero_players = [p for p in active_players if p.stack > 0]
-    player_idx = [p.position for p in non_zero_players].index(current_player)
-    for player in non_zero_players:
-        if player.position == current_player:
-            next_player = non_zero_players[(player_idx + 2) % len(non_zero_players)]
-    global_state[config.global_state_mapping[f'next_player']] = next_player.position
+    try:
+        global_state[config.global_state_mapping['current_player']] = global_state[config.global_state_mapping['next_player']]
+        non_zero_players = [p for p in active_players if p.stack > 0]
+        player_idx = [p.position for p in non_zero_players].index(current_player)
+        for player in non_zero_players:
+            if player.position == current_player:
+                next_player = non_zero_players[(player_idx + 2) % len(non_zero_players)]
+        global_state[config.global_state_mapping[f'next_player']] = next_player.position
+    except ValueError as e:
+        print(active_players)
+        print(current_player)
+        raise e
 
 def new_street_player_order(global_state:np.ndarray,config:Config):
     """ Skip players with stack 0. Which can happen if a player when allin but there are 2+ active players remaining """
     active_players = order_players_by_street(global_state,config)
+    print('active_players',active_players)
     non_zero_players = [p for p in active_players if p.stack > 0]
     global_state[config.global_state_mapping[f'current_player']] = non_zero_players[0].position if len(non_zero_players) > 0 else 0
     global_state[config.global_state_mapping[f'next_player']] = non_zero_players[1].position if len(non_zero_players) > 1 else 0
+
+def create_next_state(global_state:np.ndarray,config:Config,street:int):
+    """ Creates a new global state by copying the current global state and clearing the previous action and last agro action. """
+    new_global_state = np.copy(global_state)
+    print('new_global_state',new_global_state.shape)
+    new_global_state[config.global_state_mapping['street']] = street
+    clear_previous_action(new_global_state,config)
+    clear_last_agro_action(new_global_state,config)
+    new_street_player_order(new_global_state,config)
+    return np.stack((global_state,new_global_state))
+
 
 def get_action_mask(global_state, player_amount_invested_per_street, config:Config):
     current_player_position = int(global_state[config.global_state_mapping["current_player"]])
@@ -215,15 +241,17 @@ def return_investments(global_states,config:Config):
     player_amount_invested_per_street = {position:0 for position in config.player_positions}
     player_total_amount_invested = {position:0 for position in config.player_positions}
     current_street = 1
+    print('number of states',global_states.shape[0])
     for global_state in global_states:
         previous_player = global_state[config.global_state_mapping['previous_position']]
 
         if global_state[config.global_state_mapping['street']] > current_street:
             # new street
+            print('new street')
             player_amount_invested_per_street = {position:0 for position in config.player_positions}
             current_street = global_state[config.global_state_mapping['street']]
-            player_total_amount_invested[previous_player] += global_state[config.global_state_mapping[f'previous_amount']]
         else:
+            print('same street')
             if global_state[config.global_state_mapping[f'previous_action']] > StateActions.CALL and not global_state[config.global_state_mapping[f'previous_bet_is_blind']]:
                 # Special case for raise
                 player_total_amount_invested[previous_player] += global_state[config.global_state_mapping[f'previous_amount']] - player_amount_invested_per_street[previous_player]
@@ -231,6 +259,10 @@ def return_investments(global_states,config:Config):
             else:
                 player_total_amount_invested[previous_player] += global_state[config.global_state_mapping[f'previous_amount']]
                 player_amount_invested_per_street[previous_player] += global_state[config.global_state_mapping[f'previous_amount']]
+        print('street',global_state[config.global_state_mapping[f'street']])
+        print('previous_action',global_state[config.global_state_mapping[f'previous_action']])
+        print('previous_amount',global_state[config.global_state_mapping[f'previous_amount']])
+        print(player_amount_invested_per_street, player_total_amount_invested)
     return player_amount_invested_per_street, player_total_amount_invested
 
 def step_state(global_states:np.ndarray, action:int, config:Config):
@@ -275,9 +307,8 @@ def step_state(global_states:np.ndarray, action:int, config:Config):
                 done = True
                 winnings = game_over(global_state,config,player_total_amount_invested)
             else:
-                global_state[config.global_state_mapping[f'street']] += 1
-                clear_last_agro_action(global_state,config)
-                new_street_player_order(global_state,config)
+                # update street
+                global_state = create_next_state(global_state,config,global_state[config.global_state_mapping['street']] + 1)
         else:
             increment_players(global_state,active_players,current_player,config)
     elif action_category == CALL:
@@ -296,9 +327,7 @@ def step_state(global_states:np.ndarray, action:int, config:Config):
                 winnings = game_over(global_state,config,player_total_amount_invested)
             else:
                 # update street
-                global_state[config.global_state_mapping['street']] += 1
-                clear_last_agro_action(global_state,config)
-                new_street_player_order(global_state,config)
+                global_state = create_next_state(global_state,config,global_state[config.global_state_mapping['street']] + 1)
         else:
             increment_players(global_state,active_players,current_player,config)
     elif action_category == FOLD:
@@ -322,10 +351,14 @@ def step_state(global_states:np.ndarray, action:int, config:Config):
                 done = True
             else:
                 # update street
-                global_state[config.global_state_mapping['street']] += 1
-                clear_last_agro_action(global_state,config)
-                new_street_player_order(global_state,config)
+                global_state = create_next_state(global_state,config,global_state[config.global_state_mapping['street']] + 1)
         else:
             increment_players(global_state,active_players,current_player,config)
-    
-    return np.concatenate([global_states,global_state[None,:]],axis=0),done,winnings,get_action_mask(global_state,player_amount_invested_per_street,config)
+
+    # To account for when the street updates and we output 2 states
+    if len(global_state.shape) == 1:
+        global_states = np.concatenate([global_states,global_state[None,:]],axis=0)
+    else:
+        print(global_states.shape,global_state.shape)
+        global_states = np.concatenate([global_states,global_state])
+    return global_states,done,winnings,get_action_mask(global_states[-1],player_amount_invested_per_street,config)
