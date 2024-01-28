@@ -6,5 +6,6 @@ setup(
     description="A Python package for playing poker with reinforcement learning",
     author="Morgan griffiths",
     author_email="C5ipo7i@yahoo.com",
-    packages=find_packages(),
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
 )

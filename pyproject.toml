@@ -6,6 +6,10 @@ authors = ["Morgan Griffiths <rareducks101@yahoo.com>"]
 license = "MIT"
 readme = "README.md"
 
+
+[tool.poetry.packages]
+include = [{ from = "src", include = "pokerrl_env" }]
+
 [tool.poetry.dependencies]
 python = "3.11.5"
 numpy = "1.24.2"
