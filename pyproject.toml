@@ -1,17 +1,18 @@
 [tool.poetry]
 name = "pokerrl_env"
-version = "0.1.3"
+version = "0.1.4"
 description = "A poker environment for reinforcement learning"
 authors = ["Morgan Griffiths <rareducks101@yahoo.com>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-numpy = "^1.19.5"
-pytest = "^6.2.4"
-setuptools-rust = "^1.5.2"
+python = "3.11.5"
+numpy = "1.24.2"
+pytest = "6.2.4"
+setuptools-rust = "1.5.2"
 
 [build-system]
-requires = ["poetry-core", "setuptools-rust"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=40.6.0", "wheel", "setuptools-rust>=0.10.6"]
+build-backend = "setuptools.build_meta"
+

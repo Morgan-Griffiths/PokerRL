@@ -1,12 +1,13 @@
-from pokerrl.config import Config
-from pokerrl.view import player_view, human_readable_view
-from pokerrl.transition import step_state,init_state
-from pokerrl.play import play_game
-from pokerrl.game import Game
+from src.pokerrl.config import Config
+from src.pokerrl.view import player_view, human_readable_view
+from src.pokerrl.transition import step_state, init_state
+from src.pokerrl.play import play_game
+from src.pokerrl.game import Game
 import json
 
+
 def main():
-    game = Game(Config(num_players=2,is_server=True))
+    game = Game(Config(num_players=2, is_server=True))
     json.dumps(game.reset())
     # while True:
     #     play_game()
@@ -27,6 +28,7 @@ def main():
     #     # print(readable)
     # print('street',global_state[:,config.global_state_mapping['street']])
     # print('winnings',winnings)
+
 
 if __name__ == "__main__":
     main()
